@@ -33,7 +33,8 @@ class Planner:
                 ]
             )
 
+        # NEW: Default to RAG Question Answering
         return ExecutionPlan(
             intent=intent,
-            tools=[]
+            tools=["rag_qa"]
         )

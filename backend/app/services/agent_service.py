@@ -7,9 +7,10 @@ from app.services.audio_service import AudioService
 
 from app.agent.context_builder import ContextBuilder
 from app.agent.agent_executor import AgentExecutor
-from app.agent.tool_registry import ToolRegistry
 
 from app.services.gemini_service import gemini_service
+
+from app.rag.rag_pipeline import rag_pipeline
 
 
 class AgentService:
@@ -21,6 +22,10 @@ class AgentService:
 
         uploaded = await UploadService.process(files)
 
+        # -----------------------------
+        # Process uploaded files
+        # -----------------------------
+
         for file in files:
 
             suffix = file.filename.lower()
@@ -30,11 +35,18 @@ class AgentService:
             with open(temp_path, "wb") as f:
                 f.write(await file.read())
 
+            # ---------------- PDF ----------------
+
             if suffix.endswith(".pdf"):
 
                 result = DocumentService.process(temp_path)
 
                 extracted_contents.append(result)
+
+                # Store document into FAISS
+                rag_pipeline.ingest(result.content)
+
+            # ---------------- IMAGE ----------------
 
             elif suffix.endswith((".png", ".jpg", ".jpeg")):
 
@@ -42,32 +54,71 @@ class AgentService:
 
                 extracted_contents.append(result)
 
+            # ---------------- AUDIO ----------------
+
             elif suffix.endswith((".wav", ".mp3", ".m4a")):
 
                 result = AudioService.process(temp_path)
 
                 extracted_contents.append(result)
 
-        context = ContextBuilder.build(query, extracted_contents)
+        # -----------------------------
+        # Build extracted text (UI)
+        # -----------------------------
+
+        context = ContextBuilder.build(
+            query,
+            extracted_contents
+        )
+
+        # -----------------------------
+        # Agent Planning
+        # -----------------------------
 
         plan = AgentExecutor.execute(query)
 
-        print("========== PLAN ==========")
+        print("\n========== PLAN ==========")
         print(plan)
 
         final_answer = ""
 
-        if "summarizer" in plan["tools"]:
-            print("Calling Gemini...")
+        # -----------------------------
+        # RAG + Gemini
+        # -----------------------------
 
-            final_answer = gemini_service.summarize(context)
+        if "summarizer" in plan["tools"] or "rag_qa" in plan["tools"]:
 
-            print("========== GEMINI RESPONSE ==========")
+            print("\n========== SEARCHING FAISS ==========")
+
+            retrieved_chunks = rag_pipeline.retrieve(query)
+
+            print("\n========== RETRIEVED CHUNKS ==========")
+
+            if not retrieved_chunks:
+                print("No chunks retrieved!")
+
+            for i, chunk in enumerate(retrieved_chunks, start=1):
+
+                print(f"\n---------- Chunk {i} ----------")
+                print(chunk)
+
+            rag_context = "\n\n".join(retrieved_chunks)
+
+            print("\n========== RAG CONTEXT ==========")
+            print(rag_context)
+
+            print("\n========== CALLING GEMINI ==========")
+
+            final_answer = gemini_service.answer(
+                query=query,
+                context=rag_context
+            )
+
+            print("\n========== GEMINI RESPONSE ==========")
             print(final_answer)
+
         print("\n========== FINAL ANSWER ==========")
         print(final_answer)
-
-        
 
         return {
 
@@ -75,7 +126,10 @@ class AgentService:
 
             "query": query,
 
-            "uploaded_files": [x.model_dump() for x in uploaded],
+            "uploaded_files": [
+                x.model_dump()
+                for x in uploaded
+            ],
 
             "context": context,
 
