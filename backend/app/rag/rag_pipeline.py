@@ -9,7 +9,7 @@ class RAGPipeline:
     @staticmethod
     def ingest(text: str):
         """
-        Process a document:
+        Process document:
         Text -> Chunks -> Embeddings -> FAISS -> Save
         """
 
@@ -25,7 +25,10 @@ class RAGPipeline:
         print(f"Ingested {len(chunks)} chunks.")
 
     @staticmethod
-    def retrieve(query: str, top_k: int = 5):
+    def retrieve(
+        query: str,
+        top_k: int = 5
+    ):
         """
         Load FAISS if necessary and retrieve relevant chunks.
         """

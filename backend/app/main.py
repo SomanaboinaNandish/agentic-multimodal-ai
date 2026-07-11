@@ -30,7 +30,10 @@ app.add_middleware(
 # Register Routes
 # -----------------------------
 app.include_router(health_router, tags=["Health"])
+print(">>> Loading health router")
 app.include_router(chat_router, tags=["Chat"])
+print(">>> Loading chat router")
+print(app.routes)
 
 
 # -----------------------------
