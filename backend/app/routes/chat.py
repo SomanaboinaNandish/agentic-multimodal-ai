@@ -6,5 +6,5 @@ router = APIRouter()
 @router.post("/chat")
 async def chat():
     return {
-        "message": "Chat endpoint coming soon"
+        "message": "Chat endpoint is under development."
     }
