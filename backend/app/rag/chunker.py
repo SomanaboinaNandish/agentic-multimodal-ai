@@ -4,7 +4,7 @@ from typing import List
 class Chunker:
 
     @staticmethod
-    def split(text: str, chunk_size=500, overlap=100) -> List[str]:
+    def split(text: str, chunk_size=1000, overlap=250) -> List[str]:
 
         chunks = []
 

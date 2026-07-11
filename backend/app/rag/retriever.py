@@ -5,7 +5,7 @@ from app.rag.vector_store import vector_store
 class Retriever:
 
     @staticmethod
-    def retrieve(query: str, top_k: int = 3):
+    def retrieve(query: str, top_k: int = 5):
 
         query_embedding = embedding_service.embed_query(query)
 
