@@ -1,0 +1,30 @@
+# Python
+backend/venv/
+__pycache__/
+*.py[cod]
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+dist/
+build/
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Cache
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
