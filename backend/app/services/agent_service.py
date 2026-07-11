@@ -12,6 +12,8 @@ from app.services.gemini_service import gemini_service
 
 from app.rag.rag_pipeline import rag_pipeline
 
+from app.memory.conversation_memory import conversation_memory
+
 
 class AgentService:
 
@@ -22,9 +24,9 @@ class AgentService:
 
         uploaded = await UploadService.process(files)
 
-        # -----------------------------
+        # -----------------------------------
         # Process uploaded files
-        # -----------------------------
+        # -----------------------------------
 
         for file in files:
 
@@ -62,18 +64,18 @@ class AgentService:
 
                 extracted_contents.append(result)
 
-        # -----------------------------
-        # Build extracted text (UI)
-        # -----------------------------
+        # -----------------------------------
+        # Build extracted context (for UI)
+        # -----------------------------------
 
         context = ContextBuilder.build(
             query,
             extracted_contents
         )
 
-        # -----------------------------
+        # -----------------------------------
         # Agent Planning
-        # -----------------------------
+        # -----------------------------------
 
         plan = AgentExecutor.execute(query)
 
@@ -82,15 +84,18 @@ class AgentService:
 
         final_answer = ""
 
-        # -----------------------------
+        # -----------------------------------
         # RAG + Gemini
-        # -----------------------------
+        # -----------------------------------
 
         if "summarizer" in plan["tools"] or "rag_qa" in plan["tools"]:
 
             print("\n========== SEARCHING FAISS ==========")
 
-            retrieved_chunks = rag_pipeline.retrieve(query)
+            retrieved_chunks = rag_pipeline.retrieve(
+                query=query,
+                top_k=5
+            )
 
             print("\n========== RETRIEVED CHUNKS ==========")
 
@@ -109,9 +114,25 @@ class AgentService:
 
             print("\n========== CALLING GEMINI ==========")
 
+            # -----------------------------
+            # Conversation Memory
+            # -----------------------------
+
+            conversation_memory.add_user_message(query)
+
+            history = conversation_memory.get_formatted_history()
+
+            print("\n========== CONVERSATION HISTORY ==========")
+            print(history)
+
             final_answer = gemini_service.answer(
                 query=query,
-                context=rag_context
+                context=rag_context,
+                history=history
+            )
+
+            conversation_memory.add_assistant_message(
+                final_answer
             )
 
             print("\n========== GEMINI RESPONSE ==========")
