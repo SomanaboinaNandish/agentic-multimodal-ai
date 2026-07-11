@@ -27,25 +27,47 @@ export default function Home() {
 
             formData.append("query", query);
 
-            files.forEach(file => {
+            files.forEach((file) => {
                 formData.append("files", file);
             });
 
-            const res = await api.post("/chat", formData);
+            const res = await api.post(
+                "/chat",
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
 
-setPlan(res.data.plan);
-setContext(res.data.context);
-console.log("Response from backend:", res.data.response);
+            console.log("FULL RESPONSE:");
+            console.log(res.data);
 
-alert(res.data.response);
-
-setResponse(res.data.response);
+            setPlan(res.data.plan);
+            setContext(res.data.context);
+            setResponse(res.data.response);
 
         } catch (err) {
 
-            console.error(err);
+            console.error("Axios Error:", err);
 
-            alert("Backend request failed");
+            if (err.response) {
+
+                console.log("Status:", err.response.status);
+                console.log("Backend Response:", err.response.data);
+
+                alert(
+                    JSON.stringify(err.response.data, null, 2)
+                );
+
+            } else {
+
+                console.log("Message:", err.message);
+
+                alert(err.message);
+
+            }
 
         }
 

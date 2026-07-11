@@ -31,20 +31,39 @@ Content:
 
         return response.text
 
-    def answer(self, query: str, context: str):
+    def answer(
+        self,
+        query: str,
+        context: str,
+        history: str = ""
+    ):
 
         prompt = f"""
-You are an intelligent document assistant.
+You are an intelligent AI assistant.
 
-Use ONLY the information provided below.
+Use the conversation history to understand follow-up questions.
 
-If the answer is not present in the context, reply:
+Use ONLY the information provided in the document context.
+
+If the answer is not present, reply:
 "I couldn't find that information in the uploaded document."
 
-Context:
+========================
+Conversation History
+========================
+
+{history}
+
+========================
+Document Context
+========================
+
 {context}
 
-Question:
+========================
+Current Question
+========================
+
 {query}
 
 Provide a clear and detailed answer.
