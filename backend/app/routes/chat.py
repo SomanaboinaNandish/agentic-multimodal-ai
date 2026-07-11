@@ -2,8 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, File, Form, UploadFile
 
-from app.config.logger import logger
-from app.services.upload_service import UploadService
+from app.services.agent_service import AgentService
 
 router = APIRouter()
 
@@ -11,15 +10,9 @@ router = APIRouter()
 @router.post("/chat")
 async def chat(
     query: Annotated[str, Form(...)],
-    files: Annotated[list[UploadFile], File(description="Upload one or more files")] = [],
+    files: Annotated[list[UploadFile] | None, File()] = None,
 ):
-    logger.info(f"Received query: {query}")
+    if files is None:
+        files = []
 
-    uploaded_files = await UploadService.process(files)
-
-    return {
-        "success": True,
-        "query": query,
-        "uploaded_files": [f.model_dump() for f in uploaded_files],
-        "message": "Files received successfully",
-    }
+    return await AgentService.process(query, files)

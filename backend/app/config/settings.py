@@ -12,9 +12,7 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 
-    GOOGLE_API_KEY: str = ""
-
-    OPENAI_API_KEY: str = ""
+    GEMINI_API_KEY: str = ""
 
     LOG_LEVEL: str = "INFO"
 
