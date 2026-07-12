@@ -6,34 +6,65 @@ class Planner:
     @staticmethod
     def create(intent: Intent) -> ExecutionPlan:
 
+        # -----------------------
+        # Summary
+        # -----------------------
+
         if intent == Intent.SUMMARY:
+
             return ExecutionPlan(
                 intent=intent,
-                tools=["summarizer"]
+                tools=[
+                    "summarizer"
+                ]
             )
-        
+
+        # -----------------------
+        # Audio
+        # -----------------------
+
         if intent == Intent.AUDIO:
+
             return ExecutionPlan(
-    intent=intent,
-    tools=[
-        "audio_transcriber",
-        "rag_qa"
-    ]
-)
+                intent=intent,
+                tools=[
+                    "audio_transcriber",
+                    "audio_summarizer"
+                ]
+            )
+
+        # -----------------------
+        # Sentiment Analysis
+        # -----------------------
 
         if intent == Intent.SENTIMENT:
+
             return ExecutionPlan(
                 intent=intent,
-                tools=["sentiment"]
+                tools=[
+                    "sentiment"
+                ]
             )
+
+        # -----------------------
+        # Code Explanation
+        # -----------------------
 
         if intent == Intent.CODE:
+
             return ExecutionPlan(
                 intent=intent,
-                tools=["code_explainer"]
+                tools=[
+                    "code_explainer"
+                ]
             )
 
+        # -----------------------
+        # YouTube
+        # -----------------------
+
         if intent == Intent.YOUTUBE:
+
             return ExecutionPlan(
                 intent=intent,
                 tools=[
@@ -42,8 +73,13 @@ class Planner:
                 ]
             )
 
-        # NEW: Default to RAG Question Answering
+        # -----------------------
+        # General Question Answering
+        # -----------------------
+
         return ExecutionPlan(
             intent=intent,
-            tools=["rag_qa"]
+            tools=[
+                "rag_qa"
+            ]
         )
