@@ -1,3 +1,34 @@
+```mermaid
+flowchart TD
+
+A[React UI] --> B[FastAPI]
+
+B --> C[Agent Service]
+
+C --> D[PDF Service]
+C --> E[Image OCR]
+C --> F[Audio Whisper]
+C --> G[YouTube Tool]
+
+D --> H[Extracted Text]
+E --> H
+F --> H
+G --> H
+
+H --> I[Intent Detector]
+
+I --> J[Planner]
+
+J --> K[FAISS Retriever]
+
+K --> L[Conversation Memory]
+
+L --> M[Groq Llama 3.3]
+
+M --> N[Final Response]
+
+N --> A
+```
 # Agentic Multi-Modal AI Assistant
 
 An Agentic AI application that accepts multiple input types (Text, PDF, Image, Audio), extracts information, performs Retrieval-Augmented Generation (RAG), and autonomously selects the appropriate tools to answer user queries.
