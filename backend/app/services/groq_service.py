@@ -14,6 +14,42 @@ class GroqService:
             base_url="https://api.groq.com/openai/v1"
         )
 
+<<<<<<< HEAD
+=======
+    def summarize(self, context: str):
+
+        prompt = f"""
+You are an AI assistant.
+
+Summarize the following content.
+
+Return:
+1. One-line summary
+2. Three bullet points
+3. Five-sentence summary
+
+Content:
+{context}
+"""
+
+        response = self.client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an AI assistant."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0.2
+        )
+
+        return response.choices[0].message.content
+
+>>>>>>> origin/main
     def answer(
         self,
         query: str,
@@ -26,7 +62,11 @@ You are an intelligent AI assistant.
 
 Use the conversation history to understand follow-up questions.
 
+<<<<<<< HEAD
 Use ONLY the provided document context.
+=======
+Use ONLY the information provided in the document context.
+>>>>>>> origin/main
 
 If the answer is not present, reply:
 

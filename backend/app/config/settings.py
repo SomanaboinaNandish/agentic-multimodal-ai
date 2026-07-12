@@ -13,7 +13,13 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 
+<<<<<<< HEAD
     # Groq API Key
+=======
+    # -----------------------
+    # Groq API Key
+    # -----------------------
+>>>>>>> origin/main
     GROQ_API_KEY: str = ""
 
     LOG_LEVEL: str = "INFO"

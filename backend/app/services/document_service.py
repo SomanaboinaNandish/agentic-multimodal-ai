@@ -9,6 +9,11 @@ class DocumentService:
 
         extracted_text = PDFParser.extract_text(pdf_path)
 
+        if extracted_text is None:
+            extracted_text = ""
+
+        extracted_text = extracted_text.strip()
+
         return ExtractedContent(
             source="pdf",
             content=extracted_text

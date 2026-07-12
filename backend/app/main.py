@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.routing import APIRoute
 
 from app.config.settings import settings
 from app.config.logger import logger
@@ -31,9 +32,15 @@ app.add_middleware(
 # -----------------------------
 app.include_router(health_router, tags=["Health"])
 print(">>> Loading health router")
+
 app.include_router(chat_router, tags=["Chat"])
 print(">>> Loading chat router")
 print(app.routes)
+print("\n========== REGISTERED ROUTES ==========")
+
+for route in app.routes:
+    if isinstance(route, APIRoute):
+        print(route.path, route.methods)
 
 
 # -----------------------------
