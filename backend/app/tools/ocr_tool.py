@@ -4,8 +4,9 @@ from app.utils.text_cleaner import TextCleaner
 
 
 class OCRTool:
+
     def __init__(self):
-        # Initialize once
+
         self.reader = easyocr.Reader(
             ["en"],
             gpu=False
@@ -15,13 +16,31 @@ class OCRTool:
 
         result = self.reader.readtext(
             image_path,
-            detail=0,
-            paragraph=True
+            detail=1,
+            paragraph=False
         )
 
-        text = "\n".join(result)
+        texts = []
+        confidences = []
 
-        return TextCleaner.clean(text)
+        for _, text, confidence in result:
+
+            texts.append(text)
+            confidences.append(confidence)
+
+        cleaned_text = TextCleaner.clean(
+            "\n".join(texts)
+        )
+
+        avg_confidence = (
+            sum(confidences) / len(confidences)
+            if confidences else 0
+        )
+
+        return {
+            "text": cleaned_text,
+            "confidence": round(avg_confidence, 2)
+        }
 
 
 ocr_tool = OCRTool()

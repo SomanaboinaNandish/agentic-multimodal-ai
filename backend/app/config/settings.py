@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+
     APP_NAME: str = "Agentic Multi-Modal AI Assistant"
     APP_VERSION: str = "1.0.0"
 
@@ -12,7 +13,8 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 
-    GEMINI_API_KEY: str = ""
+    # Groq API Key
+    GROQ_API_KEY: str = ""
 
     LOG_LEVEL: str = "INFO"
 

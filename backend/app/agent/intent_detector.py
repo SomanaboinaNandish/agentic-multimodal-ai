@@ -24,6 +24,16 @@ class IntentDetector:
         # Sentiment
         if "sentiment" in query or "emotion" in query:
             return Intent.SENTIMENT
+        
+        # Audio
+        if (
+            "audio" in query
+            or "transcribe" in query
+            or "transcription" in query
+            or "speech" in query
+            or "voice" in query
+        ):
+            return Intent.AUDIO
 
         # Summary
         if (

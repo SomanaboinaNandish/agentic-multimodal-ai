@@ -9,6 +9,9 @@ class AudioService:
 
         transcript = whisper_tool.transcribe(audio_path)
 
+        print("\n========== AUDIO TRANSCRIPT ==========")
+        print(transcript)
+
         return ExtractedContent(
             source="audio",
             content=transcript

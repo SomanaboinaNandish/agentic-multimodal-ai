@@ -24,7 +24,12 @@ class VectorStore:
 
         os.makedirs(self.storage_dir, exist_ok=True)
 
-    def add_documents(self, chunks, embeddings):
+    def add_documents(
+        self,
+        chunks,
+        embeddings,
+        source="Unknown"
+):
 
         dimension = embeddings.shape[1]
 
@@ -35,7 +40,14 @@ class VectorStore:
             np.array(embeddings).astype("float32")
         )
 
-        self.documents.extend(chunks)
+        for chunk in chunks:
+
+            self.documents.append(
+            {
+                "source": source,
+                "content": chunk
+            }
+        )
 
     def search(self, query_embedding, top_k=5):
 

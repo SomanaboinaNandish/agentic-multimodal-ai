@@ -9,6 +9,7 @@ class Intent(str, Enum):
     YOUTUBE = "youtube"
     QUESTION = "question"
     UNKNOWN = "unknown"
+    AUDIO = "audio"
 
 
 class ExecutionPlan(BaseModel):
