@@ -24,24 +24,40 @@ class AgentService:
 
         uploaded = await UploadService.process(files)
 
+        print("\n========== RECEIVED FILES ==========")
+
+        if not files:
+            print("No files received!")
+
         # -----------------------------------
         # Process uploaded files
         # -----------------------------------
 
         for file in files:
 
+            print("\n========== CURRENT FILE ==========")
+            print("Filename:", file.filename)
+
             suffix = file.filename.lower()
+
+            print("Suffix:", suffix)
 
             temp_path = f"temp_{file.filename}"
 
             with open(temp_path, "wb") as f:
                 f.write(await file.read())
 
-    # ---------------- PDF ----------------
+            print("Saved:", temp_path)
+
+            # ---------------- PDF ----------------
 
             if suffix.endswith(".pdf"):
 
+                print("✅ PDF DETECTED")
+
                 result = DocumentService.process(temp_path)
+
+                print("PDF Content Length:", len(result.content))
 
                 extracted_contents.append(result)
 
@@ -56,21 +72,58 @@ class AgentService:
 
                     print(f"⚠️ Skipping empty PDF: {file.filename}")
 
-    # ---------------- IMAGE ----------------
+            # ---------------- IMAGE ----------------
 
             elif suffix.endswith((".png", ".jpg", ".jpeg")):
 
+                print("✅ IMAGE DETECTED")
+
                 result = ImageService.process(temp_path)
+
+                print("OCR Length:", len(result.content))
 
                 extracted_contents.append(result)
 
-    # ---------------- AUDIO ----------------
+                if result.content.strip():
+
+                    rag_pipeline.ingest(
+                        text=result.content,
+                        source=file.filename
+                    )
+
+                else:
+
+                    print(f"⚠️ No OCR text found: {file.filename}")
+
+            # ---------------- AUDIO ----------------
 
             elif suffix.endswith((".wav", ".mp3", ".m4a")):
 
+                print("✅ AUDIO DETECTED")
+
                 result = AudioService.process(temp_path)
 
+                print("\n========== AUDIO TRANSCRIPT ==========")
+                print(result.content)
+
                 extracted_contents.append(result)
+
+                if result.content.strip():
+
+                    print("✅ Adding audio transcript to FAISS")
+
+                    rag_pipeline.ingest(
+                        text=result.content,
+                        source=file.filename
+                    )
+
+                else:
+
+                    print(f"⚠️ Empty transcript: {file.filename}")
+
+            else:
+
+                print(f"❌ Unsupported file: {file.filename}")
 
         # -----------------------------------
         # Build extracted context (UI)
@@ -93,7 +146,7 @@ class AgentService:
         final_answer = ""
 
         # -----------------------------------
-        # RAG + Gemini
+        # RAG
         # -----------------------------------
 
         if "summarizer" in plan["tools"] or "rag_qa" in plan["tools"]:
@@ -107,9 +160,6 @@ class AgentService:
 
             print("\n========== RETRIEVED CHUNKS ==========")
 
-            if not retrieved_chunks:
-                print("No chunks retrieved!")
-
             rag_context = ""
 
             for i, chunk in enumerate(retrieved_chunks, start=1):
@@ -117,16 +167,17 @@ class AgentService:
                 print(f"\n---------- Chunk {i} ----------")
                 print(chunk)
 
-                rag_context += (
-                    f"Source: {chunk['source']}\n\n"
-                    f"{chunk['content']}\n\n"
-                    f"{'-'*60}\n\n"
-                )
+                if isinstance(chunk, dict):
 
-            print("\n========== RAG CONTEXT ==========")
-            print(rag_context)
+                    rag_context += (
+                        f"Source: {chunk['source']}\n\n"
+                        f"{chunk['content']}\n\n"
+                        f"{'-'*60}\n\n"
+                    )
 
-            print("\n========== CALLING GEMINI ==========")
+                else:
+
+                    rag_context += chunk + "\n\n"
 
             # -----------------------------------
             # Conversation Memory
@@ -139,6 +190,8 @@ class AgentService:
             print("\n========== CONVERSATION HISTORY ==========")
             print(history)
 
+            print("\n========== CALLING GROQ ==========")
+
             final_answer = groq_service.answer(
                 query=query,
                 context=rag_context,
@@ -149,27 +202,20 @@ class AgentService:
                 final_answer
             )
 
-            print("\n========== GEMINI RESPONSE ==========")
+            print("\n========== GROQ RESPONSE ==========")
             print(final_answer)
 
         print("\n========== FINAL ANSWER ==========")
         print(final_answer)
 
         return {
-
             "success": True,
-
             "query": query,
-
             "uploaded_files": [
                 x.model_dump()
                 for x in uploaded
             ],
-
             "context": context,
-
             "plan": plan,
-
-            "response": final_answer
-
+            "response": final_answer,
         }

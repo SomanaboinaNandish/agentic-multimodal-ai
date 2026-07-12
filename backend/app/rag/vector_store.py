@@ -165,17 +165,12 @@ class VectorStore:
     def clear(self):
 
         self.index = None
-
         self.documents = []
 
-        if os.path.exists(
-            self.index_path
-        ):
+        if os.path.exists(self.index_path):
             os.remove(self.index_path)
 
-        if os.path.exists(
-            self.documents_path
-        ):
+        if os.path.exists(self.documents_path):
             os.remove(self.documents_path)
 
         print("🗑️ Vector store cleared.")

@@ -11,6 +11,15 @@ class Planner:
                 intent=intent,
                 tools=["summarizer"]
             )
+        
+        if intent == Intent.AUDIO:
+            return ExecutionPlan(
+    intent=intent,
+    tools=[
+        "audio_transcriber",
+        "rag_qa"
+    ]
+)
 
         if intent == Intent.SENTIMENT:
             return ExecutionPlan(

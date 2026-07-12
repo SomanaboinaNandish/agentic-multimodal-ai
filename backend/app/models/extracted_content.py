@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class ExtractedContent(BaseModel):
@@ -9,3 +10,7 @@ class ExtractedContent(BaseModel):
 
     source: str
     content: str
+
+    # Optional fields
+    confidence: Optional[float] = None
+    page: Optional[int] = None
