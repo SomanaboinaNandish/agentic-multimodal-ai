@@ -29,5 +29,9 @@ Thumbs.db
 .coverage
 htmlcov/
 
+# Temporary uploaded files
+backend/temp_*
+
+# FAISS storage
 backend/storage/*.index
 backend/storage/*.pkl
