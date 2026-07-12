@@ -29,21 +29,15 @@ class VectorStore:
             exist_ok=True
         )
 
-<<<<<<< HEAD
-=======
     # ----------------------------------
     # Add Documents
     # ----------------------------------
 
->>>>>>> origin/main
     def add_documents(
         self,
         chunks,
         embeddings,
         source="Unknown"
-<<<<<<< HEAD
-):
-=======
     ):
 
         # Convert embeddings to NumPy array
@@ -56,7 +50,6 @@ class VectorStore:
             embeddings = embeddings.reshape(1, -1)
 
         embeddings = embeddings.astype("float32")
->>>>>>> origin/main
 
         dimension = embeddings.shape[1]
 
@@ -65,19 +58,8 @@ class VectorStore:
 
         self.index.add(embeddings)
 
-<<<<<<< HEAD
-        for chunk in chunks:
-
-            self.documents.append(
-            {
-                "source": source,
-                "content": chunk
-            }
-        )
-=======
         # Store source with each chunk
         for chunk in chunks:
->>>>>>> origin/main
 
             self.documents.append(
                 {
@@ -183,17 +165,12 @@ class VectorStore:
     def clear(self):
 
         self.index = None
-
         self.documents = []
 
-        if os.path.exists(
-            self.index_path
-        ):
+        if os.path.exists(self.index_path):
             os.remove(self.index_path)
 
-        if os.path.exists(
-            self.documents_path
-        ):
+        if os.path.exists(self.documents_path):
             os.remove(self.documents_path)
 
         print("🗑️ Vector store cleared.")

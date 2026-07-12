@@ -14,8 +14,6 @@ class GroqService:
             base_url="https://api.groq.com/openai/v1"
         )
 
-<<<<<<< HEAD
-=======
     def summarize(self, context: str):
 
         prompt = f"""
@@ -49,7 +47,6 @@ Content:
 
         return response.choices[0].message.content
 
->>>>>>> origin/main
     def answer(
         self,
         query: str,
@@ -62,11 +59,7 @@ You are an intelligent AI assistant.
 
 Use the conversation history to understand follow-up questions.
 
-<<<<<<< HEAD
-Use ONLY the provided document context.
-=======
 Use ONLY the information provided in the document context.
->>>>>>> origin/main
 
 If the answer is not present, reply:
 

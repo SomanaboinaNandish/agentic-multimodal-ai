@@ -47,13 +47,9 @@ class AgentService:
             with open(temp_path, "wb") as f:
                 f.write(await file.read())
 
-<<<<<<< HEAD
             print("Saved:", temp_path)
 
             # ---------------- PDF ----------------
-=======
-    # ---------------- PDF ----------------
->>>>>>> origin/main
 
             if suffix.endswith(".pdf"):
 
@@ -66,18 +62,6 @@ class AgentService:
                 extracted_contents.append(result)
 
                 if result.content.strip():
-<<<<<<< HEAD
-
-                    rag_pipeline.ingest(
-                        text=result.content,
-                        source=file.filename
-                    )
-
-                else:
-
-                    print(f"⚠️ Empty PDF: {file.filename}")
-=======
->>>>>>> origin/main
 
                     rag_pipeline.ingest(
                         text=result.content,
@@ -88,7 +72,7 @@ class AgentService:
 
                     print(f"⚠️ Skipping empty PDF: {file.filename}")
 
-    # ---------------- IMAGE ----------------
+            # ---------------- IMAGE ----------------
 
             elif suffix.endswith((".png", ".jpg", ".jpeg")):
 
@@ -100,7 +84,6 @@ class AgentService:
 
                 extracted_contents.append(result)
 
-<<<<<<< HEAD
                 if result.content.strip():
 
                     rag_pipeline.ingest(
@@ -113,9 +96,6 @@ class AgentService:
                     print(f"⚠️ No OCR text found: {file.filename}")
 
             # ---------------- AUDIO ----------------
-=======
-    # ---------------- AUDIO ----------------
->>>>>>> origin/main
 
             elif suffix.endswith((".wav", ".mp3", ".m4a")):
 
@@ -143,14 +123,10 @@ class AgentService:
 
             else:
 
-                print("❌ Unsupported file:", file.filename)
+                print(f"❌ Unsupported file: {file.filename}")
 
         # -----------------------------------
-<<<<<<< HEAD
-        # Build Context
-=======
         # Build extracted context (UI)
->>>>>>> origin/main
         # -----------------------------------
 
         context = ContextBuilder.build(
@@ -186,25 +162,12 @@ class AgentService:
 
             rag_context = ""
 
-<<<<<<< HEAD
-            for chunk in retrieved_chunks:
-=======
-            rag_context = ""
-
             for i, chunk in enumerate(retrieved_chunks, start=1):
->>>>>>> origin/main
 
+                print(f"\n---------- Chunk {i} ----------")
                 print(chunk)
 
-<<<<<<< HEAD
                 if isinstance(chunk, dict):
-=======
-                rag_context += (
-                    f"Source: {chunk['source']}\n\n"
-                    f"{chunk['content']}\n\n"
-                    f"{'-'*60}\n\n"
-                )
->>>>>>> origin/main
 
                     rag_context += (
                         f"Source: {chunk['source']}\n\n"
@@ -214,13 +177,11 @@ class AgentService:
 
                 else:
 
-<<<<<<< HEAD
                     rag_context += chunk + "\n\n"
-=======
+
             # -----------------------------------
             # Conversation Memory
             # -----------------------------------
->>>>>>> origin/main
 
             conversation_memory.add_user_message(query)
 
@@ -229,11 +190,8 @@ class AgentService:
             print("\n========== CONVERSATION HISTORY ==========")
             print(history)
 
-<<<<<<< HEAD
             print("\n========== CALLING GROQ ==========")
 
-=======
->>>>>>> origin/main
             final_answer = groq_service.answer(
                 query=query,
                 context=rag_context,
