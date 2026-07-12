@@ -13,37 +13,83 @@ class VectorStore:
         self.documents = []
 
         self.storage_dir = "storage"
+
         self.index_path = os.path.join(
             self.storage_dir,
             "faiss.index"
         )
+
         self.documents_path = os.path.join(
             self.storage_dir,
             "documents.pkl"
         )
 
-        os.makedirs(self.storage_dir, exist_ok=True)
+        os.makedirs(
+            self.storage_dir,
+            exist_ok=True
+        )
 
-    def add_documents(self, chunks, embeddings):
+    # ----------------------------------
+    # Add Documents
+    # ----------------------------------
+
+    def add_documents(
+        self,
+        chunks,
+        embeddings,
+        source="Unknown"
+    ):
+
+        # Convert embeddings to NumPy array
+        embeddings = np.array(embeddings)
+
+        print("Embeddings Shape:", embeddings.shape)
+
+        # Ensure embeddings are always 2D
+        if embeddings.ndim == 1:
+            embeddings = embeddings.reshape(1, -1)
+
+        embeddings = embeddings.astype("float32")
 
         dimension = embeddings.shape[1]
 
         if self.index is None:
             self.index = faiss.IndexFlatL2(dimension)
 
-        self.index.add(
-            np.array(embeddings).astype("float32")
-        )
+        self.index.add(embeddings)
 
-        self.documents.extend(chunks)
+        # Store source with each chunk
+        for chunk in chunks:
 
-    def search(self, query_embedding, top_k=5):
+            self.documents.append(
+                {
+                    "source": source,
+                    "content": chunk
+                }
+            )
+
+    # ----------------------------------
+    # Search
+    # ----------------------------------
+
+    def search(
+        self,
+        query_embedding,
+        top_k=5
+    ):
 
         if self.index is None:
             return []
 
+        query_embedding = np.array(query_embedding)
+
+        if query_embedding.ndim == 1:
+            query_embedding = query_embedding.reshape(1, -1)
+
+        query_embedding = query_embedding.astype("float32")
+
         distances, indices = self.index.search(
-            np.array([query_embedding]).astype("float32"),
+            query_embedding,
             top_k
         )
 
@@ -52,13 +98,16 @@ class VectorStore:
         for idx in indices[0]:
 
             if 0 <= idx < len(self.documents):
-                results.append(self.documents[idx])
+
+                results.append(
+                    self.documents[idx]
+                )
 
         return results
 
-    # -------------------------
+    # ----------------------------------
     # Save FAISS
-    # -------------------------
+    # ----------------------------------
 
     def save(self):
 
@@ -70,46 +119,63 @@ class VectorStore:
             self.index_path
         )
 
-        with open(self.documents_path, "wb") as f:
-            pickle.dump(self.documents, f)
+        with open(
+            self.documents_path,
+            "wb"
+        ) as f:
+
+            pickle.dump(
+                self.documents,
+                f
+            )
 
         print("✅ FAISS index saved.")
 
-    # -------------------------
+    # ----------------------------------
     # Load FAISS
-    # -------------------------
+    # ----------------------------------
 
     def load(self):
 
         if (
             os.path.exists(self.index_path)
-            and os.path.exists(self.documents_path)
+            and
+            os.path.exists(self.documents_path)
         ):
 
             self.index = faiss.read_index(
                 self.index_path
             )
 
-            with open(self.documents_path, "rb") as f:
+            with open(
+                self.documents_path,
+                "rb"
+            ) as f:
+
                 self.documents = pickle.load(f)
 
             print(
                 f"✅ Loaded {len(self.documents)} chunks from disk."
             )
 
-    # -------------------------
+    # ----------------------------------
     # Clear FAISS
-    # -------------------------
+    # ----------------------------------
 
     def clear(self):
 
         self.index = None
+
         self.documents = []
 
-        if os.path.exists(self.index_path):
+        if os.path.exists(
+            self.index_path
+        ):
             os.remove(self.index_path)
 
-        if os.path.exists(self.documents_path):
+        if os.path.exists(
+            self.documents_path
+        ):
             os.remove(self.documents_path)
 
         print("🗑️ Vector store cleared.")

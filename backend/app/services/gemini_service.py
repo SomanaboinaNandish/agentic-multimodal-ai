@@ -7,9 +7,11 @@ class GeminiService:
 
     def __init__(self):
 
+        print("Using Gemini Key:", settings.GEMINI_API_KEY[:10] + "...")
+
         genai.configure(api_key=settings.GEMINI_API_KEY)
 
-        self.model = genai.GenerativeModel("gemini-2.5-flash")
+        self.model = genai.GenerativeModel("gemini-2.0-flash")
 
     def summarize(self, context: str):
 

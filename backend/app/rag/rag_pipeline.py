@@ -7,7 +7,10 @@ from app.rag.retriever import retriever
 class RAGPipeline:
 
     @staticmethod
-    def ingest(text: str):
+    def ingest(
+        text: str,
+        source: str = "Unknown"
+    ):
         """
         Process document:
         Text -> Chunks -> Embeddings -> FAISS -> Save
@@ -17,12 +20,18 @@ class RAGPipeline:
 
         embeddings = embedding_service.embed_documents(chunks)
 
-        vector_store.add_documents(chunks, embeddings)
+        vector_store.add_documents(
+            chunks=chunks,
+            embeddings=embeddings,
+            source=source
+        )
 
-        # Save FAISS index and documents
+        # Save FAISS index and metadata
         vector_store.save()
 
-        print(f"Ingested {len(chunks)} chunks.")
+        print(
+            f"✅ Ingested {len(chunks)} chunks from {source}"
+        )
 
     @staticmethod
     def retrieve(
@@ -33,7 +42,6 @@ class RAGPipeline:
         Load FAISS if necessary and retrieve relevant chunks.
         """
 
-        # Load saved index if not already loaded
         if vector_store.index is None:
             vector_store.load()
 
