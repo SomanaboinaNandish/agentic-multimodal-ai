@@ -1,3 +1,4 @@
+print(">>> chat.py imported")
 from typing import Annotated
 
 from fastapi import APIRouter, File, Form, UploadFile

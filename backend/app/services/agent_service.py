@@ -8,7 +8,7 @@ from app.services.audio_service import AudioService
 from app.agent.context_builder import ContextBuilder
 from app.agent.agent_executor import AgentExecutor
 
-from app.services.gemini_service import gemini_service
+from app.services.groq_service import groq_service
 
 from app.rag.rag_pipeline import rag_pipeline
 
@@ -37,7 +37,7 @@ class AgentService:
             with open(temp_path, "wb") as f:
                 f.write(await file.read())
 
-            # ---------------- PDF ----------------
+    # ---------------- PDF ----------------
 
             if suffix.endswith(".pdf"):
 
@@ -45,10 +45,18 @@ class AgentService:
 
                 extracted_contents.append(result)
 
-                # Store document into FAISS
-                rag_pipeline.ingest(result.content)
+                if result.content.strip():
 
-            # ---------------- IMAGE ----------------
+                    rag_pipeline.ingest(
+                        text=result.content,
+                        source=file.filename
+                    )
+
+                else:
+
+                    print(f"⚠️ Skipping empty PDF: {file.filename}")
+
+    # ---------------- IMAGE ----------------
 
             elif suffix.endswith((".png", ".jpg", ".jpeg")):
 
@@ -56,7 +64,7 @@ class AgentService:
 
                 extracted_contents.append(result)
 
-            # ---------------- AUDIO ----------------
+    # ---------------- AUDIO ----------------
 
             elif suffix.endswith((".wav", ".mp3", ".m4a")):
 
@@ -65,7 +73,7 @@ class AgentService:
                 extracted_contents.append(result)
 
         # -----------------------------------
-        # Build extracted context (for UI)
+        # Build extracted context (UI)
         # -----------------------------------
 
         context = ContextBuilder.build(
@@ -102,21 +110,27 @@ class AgentService:
             if not retrieved_chunks:
                 print("No chunks retrieved!")
 
+            rag_context = ""
+
             for i, chunk in enumerate(retrieved_chunks, start=1):
 
                 print(f"\n---------- Chunk {i} ----------")
                 print(chunk)
 
-            rag_context = "\n\n".join(retrieved_chunks)
+                rag_context += (
+                    f"Source: {chunk['source']}\n\n"
+                    f"{chunk['content']}\n\n"
+                    f"{'-'*60}\n\n"
+                )
 
             print("\n========== RAG CONTEXT ==========")
             print(rag_context)
 
             print("\n========== CALLING GEMINI ==========")
 
-            # -----------------------------
+            # -----------------------------------
             # Conversation Memory
-            # -----------------------------
+            # -----------------------------------
 
             conversation_memory.add_user_message(query)
 
@@ -125,7 +139,7 @@ class AgentService:
             print("\n========== CONVERSATION HISTORY ==========")
             print(history)
 
-            final_answer = gemini_service.answer(
+            final_answer = groq_service.answer(
                 query=query,
                 context=rag_context,
                 history=history
