@@ -13,6 +13,7 @@ from app.services.groq_service import groq_service
 from app.rag.rag_pipeline import rag_pipeline
 
 from app.memory.conversation_memory import conversation_memory
+from app.services.youtube_service import YouTubeService
 
 
 class AgentService:
@@ -61,6 +62,10 @@ class AgentService:
 
                 extracted_contents.append(result)
 
+                # -----------------------------------
+                # Store PDF into FAISS
+                # -----------------------------------
+
                 if result.content.strip():
 
                     rag_pipeline.ingest(
@@ -71,6 +76,38 @@ class AgentService:
                 else:
 
                     print(f"⚠️ Skipping empty PDF: {file.filename}")
+                    uploaded = await UploadService.process(files)
+                    # -----------------------------------
+                    # Detect YouTube URL inside PDF
+                    # -----------------------------------
+
+                youtube_result = YouTubeService.process(
+                    result.content
+                )
+
+                if youtube_result is not None:
+
+                    print("✅ YouTube URL detected!")
+
+                    print(
+                        "Transcript Length:",
+                        len(youtube_result.content)
+                    )
+
+                    extracted_contents.append(
+                        youtube_result
+                    )
+
+                    if youtube_result.content.strip():
+
+                         rag_pipeline.ingest(
+                            text=youtube_result.content,
+                            source="YouTube Transcript"
+                        )
+
+                    else:
+
+                         print("⚠️ Empty YouTube transcript")
 
             # ---------------- IMAGE ----------------
 
